@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: health-service
+  labels:
+    app: health-service
+
+spec:
+  replicas: 3
+
+  selector:
+    matchLabels:
+      app: health-service
+
+  template:
+    metadata:
+      labels:
+        app: health-service
+
+    spec:
+      containers:
+      - name: health-service
+        image: health-service:local
+        imagePullPolicy: Never
+
+        ports:
+        - containerPort: 8080
+
+        volumeMounts:
+        - name: docker-sock
+          mountPath: /var/run/docker.sock
+
+      volumes:
+      - name: docker-sock
+        hostPath:
+          path: /var/run/docker.sock
+  
