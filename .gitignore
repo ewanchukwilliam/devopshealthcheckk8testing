@@ -3,3 +3,6 @@ personalnotes.md
 .venv
 node_modules
 build/
+src/__pycache__
+__pycache__
+container_metrics.log
