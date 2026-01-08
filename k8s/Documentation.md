@@ -31,7 +31,17 @@ kubectl run curl-test --image=curlimages/curl -i --tty --rm -- curl -s http://he
 kubectl port-forward service/health-service 8080:80
 
 curl -s http://localhost:8080/health | python3 -m json.tool
+curl -s http://localhost:8080/metrics | python3 -m json.tool
+curl -s http://localhost:8080/ | python3 -m json.tool
 
 # delete cluster
 
 kind delete cluster --name devops-lab
+
+# k9s docs to remember 
+:deploy
+<ctrl+d> to delete deployment
+<l> to view logs
+<f> fullscreen logs
+<0> to go to all pods
+<1> to local pods in current namespace
