@@ -2,12 +2,14 @@
   import { check } from 'k6';
 
 
-  const num = 30000
+  const num = 1000
   export const options = {
     stages: [
       // { duration: '10s', target: num },   
       // { duration: '20s', target: num*2 },  
       { duration: '10s', target: num },
+
+      { duration: '10s', target: 0 },
       // { duration: '10s', target: 0 },    
     ],
   };
