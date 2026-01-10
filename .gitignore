@@ -7,3 +7,4 @@ src/__pycache__
 __pycache__
 container_metrics.log
 ./k8s/personalnotes.md
+.docker/
