@@ -15,7 +15,7 @@
   // managed to get to 1500 rps remotely vvery responsive scale up with 0 lost requests. 
 
   export default function () {
-    const res = http.get('http://a09cc957f43ec4154bc745f9def963c6-5e285582f5c1f062.elb.us-east-1.amazonaws.com/health');
+    const res = http.get('http://ab19f1aa5f27e4becbecb37088325f37-7e95bd027641f301.elb.us-east-1.amazonaws.com/health');
 
     check(res, {
       'status is 200': (r) => r.status === 200,

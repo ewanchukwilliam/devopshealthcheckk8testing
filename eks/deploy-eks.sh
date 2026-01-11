@@ -52,7 +52,19 @@ kubectl get hpa
 echo ""
 
 echo "=== LoadBalancer URL ==="
-kubectl get svc health-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+NLB_HOSTNAME=$(kubectl get svc health-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+echo $NLB_HOSTNAME
 echo ""
-echo ""
+
+# Update DNS if Route 53 is configured
+if [ -f "$PROJECT_ROOT/route53/.env.route53" ]; then
+  echo "=== Updating DNS ==="
+  "$PROJECT_ROOT/route53/update-dns.sh" api "$NLB_HOSTNAME"
+  echo ""
+else
+  echo "=== DNS Update Skipped ==="
+  echo "Route 53 not configured. Run route53/setup-hosted-zone.sh to enable automatic DNS."
+  echo ""
+fi
+
 echo "Cluster deployed successfully!"

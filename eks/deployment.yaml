@@ -1,32 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
-
 metadata:
   name: health-service
   labels:
     app: health-service
-
 spec:
   replicas: 1
-
   selector:
     matchLabels:
       app: health-service
-
   template:
     metadata:
       labels:
         app: health-service
-
     spec:
       containers:
       - name: health-service
         image: 307218864628.dkr.ecr.us-east-1.amazonaws.com/health-service:latest
         imagePullPolicy: Always
-
         ports:
         - containerPort: 8080
-
         # READINESS PROBE: Prevents traffic until app is ready (fixes failures during scale-up)
         readinessProbe:
           httpGet:
@@ -37,7 +30,6 @@ spec:
           timeoutSeconds: 5
           successThreshold: 1
           failureThreshold: 3
-
         # LIVENESS PROBE: Restarts pod if app crashes (lenient to avoid killing under load)
         livenessProbe:
           httpGet:
@@ -47,7 +39,6 @@ spec:
           periodSeconds: 15
           timeoutSeconds: 5
           failureThreshold: 5
-
         resources:
           requests:
             memory: "256Mi"
