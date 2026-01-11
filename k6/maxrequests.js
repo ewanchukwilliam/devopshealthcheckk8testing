@@ -2,7 +2,7 @@
   import { check, sleep } from 'k6';
 
 
-  const num = 1000;
+  const num = 200;
   export const options = {
     stages: [
       // { duration: '10s', target: num/5 },   // Ramp to 20 users
@@ -15,7 +15,7 @@
   // managed to get to 1500 rps remotely vvery responsive scale up with 0 lost requests. 
 
   export default function () {
-    const res = http.get('http://ab19f1aa5f27e4becbecb37088325f37-7e95bd027641f301.elb.us-east-1.amazonaws.com/health');
+    const res = http.get('https://api.codeseeker.dev/health');
 
     check(res, {
       'status is 200': (r) => r.status === 200,
@@ -23,7 +23,7 @@
     });
 
     // Uncomment to add delay and measure steady-state throughput
-    // sleep(0.1);  // 100ms think time = ~10 requests/second per user
+    sleep(0.0001);  // 100ms think time = ~10 requests/second per user
   }
 
  // this means 10k requests per second holds comfortably at 9 pods with 0.5 cpu cores  
