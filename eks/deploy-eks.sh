@@ -28,13 +28,13 @@ echo "ECR Image: $ECR_IMAGE"
 echo ""
 
 echo "=== Creating EKS Cluster ==="
-# eksctl create cluster -f "$SCRIPT_DIR/eks-cluster.yaml"
-# echo ""
-#
-# echo "=== Deploying Cluster Autoscaler ==="
-# # Automatically adds/removes EC2 nodes when pods can't fit or nodes are idle
-# kubectl apply -f "$SCRIPT_DIR/cluster-autoscaler.yaml"
-# echo ""
+eksctl create cluster -f "$SCRIPT_DIR/eks-cluster.yaml"
+echo ""
+
+echo "=== Deploying Cluster Autoscaler ==="
+# Automatically adds/removes EC2 nodes when pods can't fit or nodes are idle
+kubectl apply -f "$SCRIPT_DIR/cluster-autoscaler.yaml"
+echo ""
 
 echo "=== Deploying Metrics Server ==="
 # Always delete old metrics-server to avoid immutable selector conflicts
