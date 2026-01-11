@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
@@ -13,29 +13,29 @@ REGION=$AWS_DEFAULT_REGION
 REPO_NAME="health-service"
 ECR_IMAGE="$AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$REPO_NAME:latest"
 
-echo "=== Building and Pushing to ECR ==="
-aws ecr create-repository --repository-name $REPO_NAME --region $REGION 2>/dev/null || true
-
-aws ecr get-login-password --region $REGION | \
-  docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
+# echo "=== Building and Pushing to ECR ==="
+# aws ecr create-repository --repository-name $REPO_NAME --region $REGION 2>/dev/null || true
+#
+# aws ecr get-login-password --region $REGION | \
+#   docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
 
 cd "$PROJECT_ROOT"
-docker build -t health-service:local .
-docker tag health-service:local $ECR_IMAGE
-docker push $ECR_IMAGE
-
-echo "ECR Image: $ECR_IMAGE"
-echo ""
-
-echo "=== Creating EKS Cluster ==="
-eksctl create cluster -f "$SCRIPT_DIR/eks-cluster.yaml"
-echo ""
-
+# docker build -t health-service:local .
+# docker tag health-service:local $ECR_IMAGE
+# docker push $ECR_IMAGE
+#
+# echo "ECR Image: $ECR_IMAGE"
+# echo ""
+#
+# echo "=== Creating EKS Cluster ==="
+# eksctl create cluster -f "$SCRIPT_DIR/eks-cluster.yaml"
+# echo ""
+#
 echo "=== Deploying Cluster Autoscaler ==="
 # Automatically adds/removes EC2 nodes when pods can't fit or nodes are idle
 kubectl apply -f "$SCRIPT_DIR/cluster-autoscaler.yaml"
 echo ""
-
+#
 echo "=== Deploying Application ==="
 kubectl apply -f "$SCRIPT_DIR/components.yaml"
 kubectl apply -f "$SCRIPT_DIR/deployment.yaml"
@@ -155,3 +155,6 @@ else
 fi
 
 echo "Cluster deployed successfully!"
+
+
+trap 'ec=$?; echo; echo "❌ FAILED (exit $ec) at line $LINENO:"; echo "   $BASH_COMMAND"; echo; exit $ec' ERR
