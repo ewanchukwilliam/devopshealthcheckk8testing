@@ -9,4 +9,3 @@ container_metrics.log
 ./k8s/personalnotes.md
 .docker/
 .env.route53
-.env.route53
