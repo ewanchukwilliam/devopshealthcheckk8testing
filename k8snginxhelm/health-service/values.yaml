@@ -1,0 +1,79 @@
+# Default values for health-service
+
+replicaCount: 1
+
+image:
+  repository: ""  # Set dynamically via --set in deploy script
+  tag: latest
+  pullPolicy: Always
+
+service:
+  type: LoadBalancer
+  httpPort: 80
+  httpsPort: 443
+  targetPort: 8080
+
+  # SSL Configuration (set dynamically via --set flags in deploy script)
+  ssl:
+    enabled: false
+    certificateArn: ""
+    policy: "ELBSecurityPolicy-TLS-1-2-2017-01"
+
+  # AWS Load Balancer annotations
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "500m"
+  limits:
+    memory: "512Mi"
+    cpu: "1000m"
+
+# Health check probes
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 8080
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 3
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 8080
+  initialDelaySeconds: 30
+  periodSeconds: 15
+  timeoutSeconds: 5
+  failureThreshold: 5
+
+# Horizontal Pod Autoscaler
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+  # Scale up behavior
+  scaleUp:
+    stabilizationWindowSeconds: 0
+    policies:
+    - type: Percent
+      value: 100
+      periodSeconds: 15
+    - type: Pods
+      value: 4
+      periodSeconds: 15
+    selectPolicy: Max
+
+  # Scale down behavior
+  scaleDown:
+    stabilizationWindowSeconds: 30
+    policies:
+    - type: Percent
+      value: 50
+      periodSeconds: 15
