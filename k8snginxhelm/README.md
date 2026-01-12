@@ -8,11 +8,19 @@ Everything via Helm:
 
 1. **EKS Cluster** (via eksctl)
 2. **Metrics Server** (EKS add-on for HPA)
-3. **Cluster Autoscaler** (Helm chart - scales nodes 1-6)
-4. **NGINX Ingress Controller** (Helm chart - scales pods 2-10)
-5. **Health Service Application** (Helm chart - scales pods 1-10)
+3. **cert-manager** (Helm chart - automatic HTTPS certificates via Let's Encrypt)
+4. **Cluster Autoscaler** (Helm chart - scales nodes 1-6)
+5. **NGINX Ingress Controller** (Helm chart - scales pods 2-10, handles SSL termination)
+6. **Health Service Application** (Helm chart - scales pods 1-10)
 
 Replaces 660+ lines of manual YAML with Helm charts.
+
+## HTTPS with Let's Encrypt
+
+- Automatic certificate issuance and renewal
+- Valid certificates from Let's Encrypt
+- cert-manager handles everything automatically
+- Certificates renew 30 days before expiry
 
 ## Autoscaling Configuration
 

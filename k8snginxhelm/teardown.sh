@@ -14,6 +14,10 @@ helm uninstall health-service 2>/dev/null || echo "health-service not found, ski
 echo "Removing nginx-ingress..."
 helm uninstall nginx-ingress --namespace ingress-nginx 2>/dev/null || echo "nginx-ingress not found, skipping"
 
+# Uninstall cert-manager
+echo "Removing cert-manager..."
+helm uninstall cert-manager --namespace cert-manager 2>/dev/null || echo "cert-manager not found, skipping"
+
 # Uninstall cluster autoscaler
 echo "Removing cluster-autoscaler..."
 helm uninstall cluster-autoscaler --namespace kube-system 2>/dev/null || echo "cluster-autoscaler not found, skipping"

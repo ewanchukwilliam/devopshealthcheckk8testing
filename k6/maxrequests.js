@@ -7,8 +7,7 @@
     stages: [
       // { duration: '10s', target: num/5 },   // Ramp to 20 users
       { duration: '5s', target: num },    
-      // { duration: '30s', target: num },    
-      { duration: '2m', target: num },   
+      { duration: '5m', target: num },   
       { duration: '10s', target: 0 },    
     ],
   };
@@ -30,3 +29,4 @@
 // cool beans not running into issues of request port maxxing now. 1000 conccurrent users spamming my docker instance conncurrently is 10k requests per second for 9 cores aka 9 containers then stabilizes at 64% usage. 
   // AKA THIS IS SO FUCKING COOL
   // only drops requests during ramp up. then drops less and less often. 
+  //

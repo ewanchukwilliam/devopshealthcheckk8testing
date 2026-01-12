@@ -58,6 +58,23 @@ kubectl wait --for=condition=ready pod -l k8s-app=metrics-server -n kube-system 
 }
 echo ""
 
+echo "=== Installing cert-manager for HTTPS ==="
+helm repo add jetstack https://charts.jetstack.io
+helm repo update
+helm install cert-manager jetstack/cert-manager \
+  --namespace cert-manager \
+  --create-namespace \
+  --set crds.enabled=true \
+  --set global.leaderElection.namespace=cert-manager
+
+echo "Waiting for cert-manager to be ready..."
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=cert-manager -n cert-manager --timeout=120s
+echo ""
+
+echo "=== Creating Let's Encrypt ClusterIssuer ==="
+kubectl apply -f "$SCRIPT_DIR/letsencrypt-issuer.yaml"
+echo ""
+
 echo "=== Deploying Cluster Autoscaler via Helm ==="
 helm repo add autoscaler https://kubernetes.github.io/autoscaler
 helm repo update
@@ -65,9 +82,9 @@ helm install cluster-autoscaler autoscaler/cluster-autoscaler \
   --namespace kube-system \
   --set autoDiscovery.clusterName=health-service-cluster-v2 \
   --set awsRegion=us-east-1 \
-  --set rbac.serviceAccount.annotations."eks\.amazonaws\.com/role-arn"="arn:aws:iam::${AWS_ACCOUNT_ID}:role/eksctl-health-service-cluster-v2-NodeInstanceRole" \
   --set extraArgs.balance-similar-node-groups=true \
-  --set extraArgs.skip-nodes-with-system-pods=false
+  --set extraArgs.skip-nodes-with-system-pods=false \
+  --set rbac.create=true
 echo ""
 
 echo "=== Installing NGINX Ingress Controller via Helm ==="
@@ -162,7 +179,8 @@ kubectl get hpa
 echo ""
 
 echo "=== LoadBalancer URL ==="
-NLB_HOSTNAME=$(kubectl get svc health-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+# Get NGINX Ingress LoadBalancer (this is what handles all traffic)
+NLB_HOSTNAME=$(kubectl get svc nginx-ingress-ingress-nginx-controller -n ingress-nginx -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
 echo $NLB_HOSTNAME
 echo ""
 

@@ -8,20 +8,26 @@ image:
   pullPolicy: Always
 
 service:
-  type: LoadBalancer
+  type: ClusterIP  # Changed from LoadBalancer - use NGINX instead
   httpPort: 80
   httpsPort: 443
   targetPort: 8080
 
-  # SSL Configuration (set dynamically via --set flags in deploy script)
-  ssl:
-    enabled: false
-    certificateArn: ""
-    policy: "ELBSecurityPolicy-TLS-1-2-2017-01"
-
-  # AWS Load Balancer annotations
+# Ingress configuration (routes traffic through NGINX)
+ingress:
+  enabled: true
+  className: nginx
   annotations:
-    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  hosts:
+    - host: "api.codeseeker.dev"
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: health-service-tls
+      hosts:
+        - api.codeseeker.dev
 
 resources:
   requests:

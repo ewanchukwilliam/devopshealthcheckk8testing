@@ -4,15 +4,6 @@ metadata:
   name: {{ .Chart.Name }}
   labels:
     app: {{ .Chart.Name }}
-  annotations:
-    {{- range $key, $value := .Values.service.annotations }}
-    {{ $key }}: {{ $value | quote }}
-    {{- end }}
-    {{- if .Values.service.ssl.enabled }}
-    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: {{ .Values.service.ssl.certificateArn | quote }}
-    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
-    service.beta.kubernetes.io/aws-load-balancer-ssl-negotiation-policy: {{ .Values.service.ssl.policy | quote }}
-    {{- end }}
 spec:
   type: {{ .Values.service.type }}
   selector:
@@ -21,8 +12,3 @@ spec:
   - name: http
     port: {{ .Values.service.httpPort }}
     targetPort: {{ .Values.service.targetPort }}
-  {{- if .Values.service.ssl.enabled }}
-  - name: https
-    port: {{ .Values.service.httpsPort }}
-    targetPort: {{ .Values.service.targetPort }}
-  {{- end }}
