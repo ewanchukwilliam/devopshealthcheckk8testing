@@ -219,25 +219,4 @@ fi
 echo ""
 echo "Waiting for application to be ready..."
 
-echo "=== Health Check (HTTP/HTTPS) ==="
-MAX_RETRIES=60
-RETRY_COUNT=0
-while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-  response=$(curl -s -o /dev/null -w "%{http_code}" http://$NLB_HOSTNAME/health 2>/dev/null || echo "000")
-  if [ "$response" = "200" ]; then
-    echo "✅ Application is ready!"
-    if [ "$SSL_ENABLED" = true ]; then
-      echo "   https://api.$DOMAIN/health"
-    else
-      echo "   http://$NLB_HOSTNAME/health"
-    fi
-    break
-  fi
-  RETRY_COUNT=$((RETRY_COUNT + 1))
-  sleep 5
-done
-if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
-  echo "⚠️  Timed out waiting for health endpoint. Check: kubectl get pods"
-fi
-
 trap 'ec=$?; echo; echo "❌ FAILED (exit $ec) at line $LINENO:"; echo "   $BASH_COMMAND"; echo; exit $ec' ERR
