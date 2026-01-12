@@ -4,10 +4,6 @@ set -Eeuo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
-echo "=== Building and Pushing to ECR DOCKER STUFF ==="
-REGION=$AWS_DEFAULT_REGION
-REPO_NAME="health-service"
-ECR_IMAGE="$AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$REPO_NAME:latest"
 
 echo "=== Checking for SSL Certificate ==="
 SSL_ENABLED=false
@@ -33,6 +29,11 @@ if [ -f "$PROJECT_ROOT/route53/.env.route53" ]; then
   fi
 fi
 
+echo "=== Building and Pushing to ECR DOCKER STUFF ==="
+REGION=$AWS_DEFAULT_REGION
+REPO_NAME="health-service"
+ECR_IMAGE="$AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$REPO_NAME:latest"
+
 echo "=== Building and Pushing to ECR ==="
 aws ecr create-repository --repository-name $REPO_NAME --region $REGION 2>/dev/null || true
 aws ecr get-login-password --region $REGION | \
@@ -43,6 +44,9 @@ docker tag health-service:local $ECR_IMAGE
 docker push $ECR_IMAGE
 echo "ECR Image: $ECR_IMAGE"
 echo ""
+
+# Uncomment to update pods quickly (comment everything else out for a running deployment)
+# kubectl rollout restart deployment health-service
 
 echo "=== Creating EKS remote cluster ==="
 eksctl create cluster -f "$SCRIPT_DIR/eks-cluster.yaml"

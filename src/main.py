@@ -3,6 +3,7 @@ import logging
 import asyncio
 from datetime import datetime
 from typing import Dict, Optional
+from fastapi.responses import HTMLResponse
 import psutil
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -131,6 +132,50 @@ async def get_metrics():
 
     return response
 
+@app.get("/page", response_class=HTMLResponse)
+async def return_page():
+    """this just returns a webpage to mess around with"""
+
+    logger.info(f"Someone requested a webpage time: {datetime.utcnow().isoformat()}")
+    html_content = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Health Service Monitor</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                max-width: 800px;
+                margin: 50px auto;
+                padding: 20px;
+                background-color: #f5f5f5;
+            }
+            h1 {
+                color: #333;
+            }
+            .info {
+                background-color: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="info">
+            <h1>Hello from Health Service!</h1>
+            <p>This is a simple web page served by the containerized FastAPI service.</p>
+            <p><strong>Available endpoints:</strong></p>
+            <ul>
+                <li><a href="/health">/health</a> - Health check with resource usage</li>
+                <li><a href="/metrics">/metrics</a> - Detailed process metrics</li>
+                <li><a href="/page">/page</a> - This page</li>
+            </ul>
+        </div>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content)
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8080))
