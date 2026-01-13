@@ -493,9 +493,14 @@ async def return_page():
                 const statusEl = document.getElementById("redis-status");
                 const panel = document.getElementById("redis-panel");
 
+                let autoRefreshId = null;
+                let loading = false;
+
                 async function loadRedisData() {
+                    if (loading) return; // don't double-fire if previous call still in flight
+                    loading = true;
+
                     statusEl.textContent = "Loading Redis CPU data...";
-                    panel.innerHTML = "";
 
                     btn.disabled = true;
                     refreshBtn.disabled = true;
@@ -503,19 +508,23 @@ async def return_page():
                     try {
                         const res = await fetch("/get-all-redis-keys");
                         const text = await res.text();
-                        const data = JSON.parse(text);
+                        const data = JSON.parse(text || "{}");
 
                         const entries = Object.values(data);
 
                         if (!entries.length) {
+                            // keep old cards on screen, just update status text
                             statusEl.textContent = "No CPU records found in Redis yet.";
                             return;
                         }
 
-                        // Swap views (idempotent)
+                        // First time: swap views
                         defaultSection.classList.add("hidden");
                         redisSection.classList.remove("hidden");
                         statusEl.textContent = "Last updated: " + new Date().toLocaleTimeString();
+
+                        // Build new DOM off-screen
+                        const frag = document.createDocumentFragment();
 
                         entries.forEach(item => {
                             const card = document.createElement("div");
@@ -531,12 +540,17 @@ async def return_page():
                                 <div class="redis-ts">Updated at ${tsLabel}</div>
                             `;
 
-                            panel.appendChild(card);
+                            frag.appendChild(card);
                         });
+
+                        // Single atomic update – no blank state
+                        panel.replaceChildren(frag);
                     } catch (err) {
                         console.error(err);
+                        // don't clear old content, just show error
                         statusEl.textContent = "Error loading Redis data: " + err;
                     } finally {
+                        loading = false;
                         btn.disabled = false;
                         refreshBtn.disabled = false;
                     }
@@ -544,6 +558,11 @@ async def return_page():
 
                 btn.addEventListener("click", () => {
                     loadRedisData();
+
+                    // Start auto-refresh every 1s after first click
+                    if (autoRefreshId === null) {
+                        autoRefreshId = setInterval(loadRedisData, 1000);
+                    }
                 });
 
                 refreshBtn.addEventListener("click", () => {
@@ -555,8 +574,6 @@ async def return_page():
     </html>
     """
     return HTMLResponse(content=html_content)
-
-
 
 @app.get("/check-redis", response_class=HTMLResponse)
 async def return_redis_port_connection_status():
