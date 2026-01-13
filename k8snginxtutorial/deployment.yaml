@@ -66,6 +66,28 @@ spec:  # Desired state specification
       - name: health-service  # Container name (shown in logs)
         image: health-service:local  # Docker image to use (change to ECR URL for EKS)
         imagePullPolicy: Never  # Don't pull from registry, use local image (change to "Always" for ECR)
+        env:
+          # Downward API
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+
+          # Redis (matches your current Python)
+          - name: REDIS_HOST
+            value: "redis"                # Service name, NOT a URL
+          - name: REDIS_PORT
+            value: "6379"
+          - name: REDIS_URL
+            value: "redis://redis:6379/0"
         # args:  # Optional: Override container CMD
         # - "--port=8080"
         # - "--log-level=info"

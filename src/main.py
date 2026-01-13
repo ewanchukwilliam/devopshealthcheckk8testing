@@ -1,13 +1,27 @@
 import os
 import logging
-import asyncio
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Dict
 from fastapi.responses import HTMLResponse
 import psutil
 from fastapi import FastAPI
 from pydantic import BaseModel
 import uvicorn
+import redis
+import time
+import json
+import threading
+
+
+POD_NAME = os.getenv("POD_NAME")
+POD_NAMESPACE = os.getenv("POD_NAMESPACE", "default")
+NODE_NAME = os.getenv("NODE_NAME")
+
+print("Node from env:", NODE_NAME)
+
+REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
+REDIS_PORT = os.getenv("REDIS_PORT", "6379")
+r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=0, decode_responses=True)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -350,10 +364,69 @@ async def return_page():
     """
     return HTMLResponse(content=html_content)
 
+@app.get("/check-redis", response_class=HTMLResponse)
+async def return_redis_port_connection_status():
+    """this just checks port 6379 to see if redis is running"""
+    try:
+        r.ping()
+        return HTMLResponse(content="container is able to connect to redis")
+    except Exception as e:
+        return HTMLResponse(content=f"container is unable to connect to redis + {e}")
+
+@app.get("/get-all-redis-keys", response_class=HTMLResponse)
+async def get_all_redis_keys():
+    """return and join all keys in redis"""
+    try:
+        state = {}
+        for key in r.scan_iter("cpu:*"):
+            val = r.get(key)
+            if val:
+                state[key] = json.loads(val)
+        logger.info(f"All keys in redis: {state}")
+        return HTMLResponse(content=json.dumps(state))
+    except Exception as e:
+        logger.error(f"Error getting all keys from redis: {e}")
+        return HTMLResponse(content=f"Error getting all keys from redis: {e}")
+
+# this is a background thread/task that runs periodically and reports CPU usage to the shared Redis pod
+def start_cpu_reporter():
+    redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+    r = redis.Redis.from_url(redis_url, decode_responses=True)
+    ns = os.getenv("POD_NAMESPACE", "default")
+    pod = os.getenv("POD_NAME", "unknown")
+    key = f"cpu:{ns}:{pod}"
+    ttl = 5
+    interval = 3
+    psutil.cpu_percent(interval=None)  # prime
+    def loop():
+        while True:
+            try:
+                cpu = psutil.cpu_percent(interval=None)
+                payload = {
+                    "pod": pod,
+                    "namespace": ns,
+                    "cpu_percent": cpu,
+                    "ts": time.time(),
+                }
+                r.set(key, json.dumps(payload), ex=ttl)
+            except Exception:
+                # optionally log the exception here
+                pass
+            time.sleep(interval)
+    t = threading.Thread(target=loop, daemon=True, name="cpu-reporter")
+    t.start()
+    return t
+
+@app.on_event("startup")
+def startup():
+    start_cpu_reporter()
+
+
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8080))
     host = os.getenv("HOST", "0.0.0.0")
     workers = int(os.getenv("WORKERS", 10))  
+
 
     logger.info(f"Starting Container Resource Monitor on {host}:{port} with {workers} workers")
     uvicorn.run(
