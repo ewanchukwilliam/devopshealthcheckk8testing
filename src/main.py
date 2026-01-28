@@ -499,6 +499,7 @@ async def return_page():
                         <div class="section-header-right">
                             <span id="health-status" class="section-status"></span>
                             <button id="health-refresh-btn" type="button" class="btn-refresh">Refresh</button>
+                            <button type="button" class="btn-refresh" onclick="location.reload()">Back</button>
                         </div>
                     </div>
                     <div id="health-panel" class="grid-panel"></div>
@@ -511,6 +512,7 @@ async def return_page():
                         <div class="section-header-right">
                             <span id="metrics-status" class="section-status"></span>
                             <button id="metrics-refresh-btn" type="button" class="btn-refresh">Refresh</button>
+                            <button type="button" class="btn-refresh" onclick="location.reload()">Back</button>
                         </div>
                     </div>
                     <div id="metrics-panel" class="grid-panel"></div>
@@ -523,6 +525,7 @@ async def return_page():
                         <div class="section-header-right">
                             <span id="redis-status" class="section-status"></span>
                             <button id="refresh-redis-btn" type="button" class="btn-refresh">Refresh</button>
+                            <button type="button" class="btn-refresh" onclick="location.reload()">Back</button>
                         </div>
                     </div>
                     <div id="redis-panel" class="grid-panel"></div>

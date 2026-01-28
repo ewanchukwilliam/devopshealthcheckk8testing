@@ -10,7 +10,7 @@
   };
 
   export default function () {
-    const res = http.get('http://localhost/health');
+    const res = http.get('http://api.codeseeker.dev/health');
 
     check(res, {
       'status is 200': (r) => r.status === 200,

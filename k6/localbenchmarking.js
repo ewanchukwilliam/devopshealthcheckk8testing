@@ -14,7 +14,7 @@
   // managed to get to 1500 rps remotely vvery responsive scale up with 0 lost requests. 
 
   export default function () {
-    const res = http.get('https://api.codeseeker.dev/health');
+    const res = http.get('http://localhost/health');
 
     check(res, {
       'status is 200': (r) => r.status === 200,
