@@ -47,19 +47,20 @@ kubectl apply -f "$SCRIPT_DIR/ingress-controller.yaml"
 
 # Wait for ingress controller to be ready before applying ingress
 echo "Waiting for ingress controller deployment to roll out..."
-kubectl rollout status deployment/ingress-nginx-controller -n ingress-nginx --timeout=120s
+kubectl rollout status deployment/ingress-nginx-controller -n ingress-nginx --timeout=180s
 
 # Wait for admission webhook jobs to complete
 echo "Waiting for admission webhook jobs to complete..."
 kubectl wait --namespace ingress-nginx \
   --for=condition=complete job/ingress-nginx-admission-create \
-  --timeout=60s || true
+  --timeout=90s || true
 kubectl wait --namespace ingress-nginx \
   --for=condition=complete job/ingress-nginx-admission-patch \
-  --timeout=60s || true
+  --timeout=90s || true
 
-# Give webhook service a moment to be fully ready
-sleep 5
+# Give webhook service time to be fully ready
+echo "Waiting for webhook service to be ready..."
+sleep 15
 
 # Now apply the ingress
 kubectl apply -f "$SCRIPT_DIR/ingress.yaml"

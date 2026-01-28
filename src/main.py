@@ -178,7 +178,7 @@ async def return_page():
             body {
                 font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
                              sans-serif;
-                background: radial-gradient(circle at top, #020617 0, #020617 45%, #000 100%);
+                background: #1e293b;
                 color: var(--text-main);
                 min-height: 100vh;
                 display: flex;
@@ -193,25 +193,10 @@ async def return_page():
             }
 
             .card {
-                background: var(--bg-card);
-                border-radius: 16px;
+                background: #0f172a;
+                border-radius: 8px;
                 padding: 28px 28px 22px 28px;
-                box-shadow:
-                    0 18px 45px rgba(0, 0, 0, 0.9),
-                    0 0 0 1px rgba(148, 163, 184, 0.08);
-                border: 1px solid rgba(15, 23, 42, 0.9);
-                animation: fadeIn 0.35s ease-out;
-            }
-
-            @keyframes fadeIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(4px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
+                border: 1px solid #334155;
             }
 
             h1 {
@@ -249,9 +234,9 @@ async def return_page():
                 letter-spacing: 0.08em;
                 color: var(--text-muted);
                 padding: 4px 9px;
-                border-radius: 999px;
-                border: 1px solid rgba(148, 163, 184, 0.4);
-                background: rgba(15, 23, 42, 0.7);
+                border-radius: 4px;
+                border: 1px solid #475569;
+                background: #1e293b;
             }
 
             .stats {
@@ -262,10 +247,10 @@ async def return_page():
             }
 
             .stat {
-                background: var(--bg-elevated);
-                border-radius: 8px;
+                background: #1e293b;
+                border-radius: 6px;
                 padding: 10px 12px;
-                border: 1px solid rgba(31, 41, 55, 0.9);
+                border: 1px solid #475569;
                 min-width: 96px;
             }
 
@@ -283,15 +268,6 @@ async def return_page():
                 color: var(--accent);
             }
 
-            .pulse {
-                animation: pulse 2s ease-in-out infinite;
-            }
-
-            @keyframes pulse {
-                0%, 100% { opacity: 1; }
-                50% { opacity: 0.6; }
-            }
-
             .endpoints {
                 display: grid;
                 grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
@@ -300,27 +276,20 @@ async def return_page():
             }
 
             .endpoint-card {
-                background: #020617;
-                border-radius: 10px;
+                background: #1e293b;
+                border-radius: 6px;
                 padding: 14px 14px 12px 14px;
                 text-decoration: none;
                 color: var(--text-main);
-                border: 1px solid rgba(30, 64, 175, 0.55);
+                border: 1px solid #475569;
                 display: flex;
                 flex-direction: column;
                 gap: 4px;
-                transition:
-                    transform 0.12s ease,
-                    border-color 0.12s ease,
-                    box-shadow 0.12s ease,
-                    background-color 0.12s ease;
             }
 
             .endpoint-card:hover {
-                transform: translateY(-1px);
-                border-color: rgba(56, 189, 248, 0.85);
-                box-shadow: 0 10px 20px rgba(15, 23, 42, 0.9);
-                background-color: #020617;
+                border-color: #64748b;
+                background-color: #334155;
             }
 
             .endpoint-title {
@@ -343,17 +312,11 @@ async def return_page():
 
             .endpoint-card.button-like {
                 cursor: pointer;
-                border: 1px solid rgba(34, 197, 235, 0.9);
-                background: radial-gradient(circle at top left,
-                                            rgba(34, 211, 238, 0.12),
-                                            rgba(15, 23, 42, 1));
             }
 
             .endpoint-card.button-like:disabled {
                 opacity: 0.7;
                 cursor: wait;
-                transform: none;
-                box-shadow: none;
             }
 
             .footer {
@@ -361,7 +324,7 @@ async def return_page():
                 margin-top: 16px;
                 color: var(--text-muted);
                 font-size: 0.7rem;
-                border-top: 1px solid rgba(15, 23, 42, 1);
+                border-top: 1px solid #334155;
                 padding-top: 8px;
             }
 
@@ -406,11 +369,10 @@ async def return_page():
             }
 
             .data-card {
-                background: #020617;
-                border-radius: 10px;
+                background: #1e293b;
+                border-radius: 6px;
                 padding: 12px 12px 10px 12px;
-                border: 1px solid rgba(31, 41, 55, 0.9);
-                box-shadow: 0 8px 18px rgba(15, 23, 42, 0.9);
+                border: 1px solid #475569;
                 font-size: 0.8rem;
             }
 
@@ -442,28 +404,22 @@ async def return_page():
 
             .btn-refresh {
                 padding: 6px 11px;
-                border-radius: 999px;
-                border: 1px solid rgba(148, 163, 184, 0.5);
-                background: rgba(15, 23, 42, 0.9);
+                border-radius: 4px;
+                border: 1px solid #475569;
+                background: #1e293b;
                 color: var(--text-main);
                 font-size: 0.75rem;
                 cursor: pointer;
-                transition:
-                    background-color 0.12s ease,
-                    border-color 0.12s ease,
-                    transform 0.12s ease;
             }
 
             .btn-refresh:hover {
-                background: rgba(30, 64, 175, 0.95);
-                border-color: rgba(56, 189, 248, 0.9);
-                transform: translateY(-1px);
+                background: #334155;
+                border-color: #64748b;
             }
 
             .btn-refresh:disabled {
                 opacity: 0.6;
                 cursor: wait;
-                transform: none;
             }
         </style>
     </head>
@@ -479,12 +435,12 @@ async def return_page():
                 </div>
 
                 <!-- Load Testing Instructions -->
-                <div style="background: rgba(30, 64, 175, 0.15); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 10px; padding: 14px 16px; margin-bottom: 18px;">
+                <div style="background: #1e293b; border: 1px solid #475569; border-radius: 6px; padding: 14px 16px; margin-bottom: 18px;">
                     <div style="font-size: 0.85rem; font-weight: 500; margin-bottom: 8px; color: var(--accent);">Load Testing with K6</div>
                     <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.5;">
                         Test autoscaling by running K6 against these endpoints:<br>
-                        <code style="background: rgba(15, 23, 42, 0.8); padding: 2px 6px; border-radius: 4px; font-size: 0.75rem;">https://api.codeseeker.dev/health</code> or
-                        <code style="background: rgba(15, 23, 42, 0.8); padding: 2px 6px; border-radius: 4px; font-size: 0.75rem;">https://api.codeseeker.dev/metrics</code><br><br>
+                        <code style="background: #0f172a; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem;">https://api.codeseeker.dev/health</code> or
+                        <code style="background: #0f172a; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem;">https://api.codeseeker.dev/metrics</code><br><br>
                         <strong style="color: var(--text-main);">Suggested config:</strong> ~100 VUs for 5 minutes<br><br>
                         Then open the <strong style="color: var(--accent);">Redis CPU View</strong> below to watch containers scale in real-time as load increases.
                     </div>
@@ -495,11 +451,7 @@ async def return_page():
                     <div class="stats">
                         <div class="stat">
                             <div class="stat-label">Status</div>
-                            <div class="stat-value pulse">Online</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-label">API Version</div>
-                            <div class="stat-value">v2.0</div>
+                            <div class="stat-value">Online</div>
                         </div>
                         <div class="stat">
                             <div class="stat-label">Platform</div>
