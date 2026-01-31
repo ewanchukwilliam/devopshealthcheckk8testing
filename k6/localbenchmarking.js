@@ -2,7 +2,7 @@
   import { check, sleep } from 'k6';
 
 
-  const num = 200;
+  const num = 500;
   export const options = {
     stages: [
       // { duration: '10s', target: num/5 },   // Ramp to 20 users
@@ -22,7 +22,7 @@
     });
 
     // Uncomment to add delay and measure steady-state throughput
-    sleep(0.0001);  // 100ms think time = ~10 requests/second per user
+    sleep(0.00001);  // 100ms think time = ~10 requests/second per user
   }
 
  // this means 10k requests per second holds comfortably at 9 pods with 0.5 cpu cores  

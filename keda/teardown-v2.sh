@@ -149,7 +149,7 @@ eksctl delete addon --cluster health-service-cluster-v3 --name metrics-server --
 
 echo ""
 echo "=== Deleting EKS Cluster ==="
-eksctl delete cluster -f "$SCRIPT_DIR/eks-cluster.yaml" --wait
+eksctl delete cluster -f "$SCRIPT_DIR/eks-cluster.yaml" 
 
 echo ""
 echo "✅ Cluster and all Helm releases deleted successfully!"
