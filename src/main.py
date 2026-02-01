@@ -108,7 +108,7 @@ def get_process_metrics() -> Dict:
         }
 @app.get("/ping", response_model=Dict)
 async def ping():
-    """Health check endpoint with current resource usage"""
+    """benchmarking endpoint"""
     return {
         "status": "ok",
         "feeling": "good",
