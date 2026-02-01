@@ -41,46 +41,27 @@ spec:
   triggers:
     # CPU % - primary trigger for local testing
     - type: prometheus
+      metricType: Value
       metadata:
         serverAddress: http://prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090
         metricName: health_service_cpu_utilization
-        threshold: "70"
+        threshold: "90"
         query: |
-          avg(
-            rate(container_cpu_usage_seconds_total{
-              namespace="default",
-              pod=~"health-service.*",
-              container="health-service"
-            }[2m])
-          ) * 100 /
-          avg(
-            kube_pod_container_resource_requests{
-              namespace="default",
-              pod=~"health-service.*",
-              container="health-service",
-              resource="cpu"
-            }
-          )
-
-    # Memory %
-    - type: prometheus
-      metadata:
-        serverAddress: http://prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090
-        metricName: health_service_memory_utilization
-        threshold: "80"
-        query: |
-          avg(
-            container_memory_working_set_bytes{
-              namespace="default",
-              pod=~"health-service.*",
-              container="health-service"
-            }
-          ) * 100 /
-          avg(
-            kube_pod_container_resource_requests{
-              namespace="default",
-              pod=~"health-service.*",
-              container="health-service",
-              resource="memory"
-            }
-          )
+          (
+            avg(
+              rate(container_cpu_usage_seconds_total{
+                namespace="default",
+                pod=~"health-service.*",
+                container="health-service"
+              }[2m])
+            )
+            /
+            avg(
+              kube_pod_container_resource_requests{
+                namespace="default",
+                pod=~"health-service.*",
+                container="health-service",
+                resource="cpu"
+              }
+            )
+          ) * 100
