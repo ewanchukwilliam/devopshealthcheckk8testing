@@ -45,7 +45,7 @@ spec:
       metadata:
         serverAddress: http://prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090
         metricName: health_service_cpu_utilization
-        threshold: "90"
+        threshold: "70"
         query: |
           (
             avg(
