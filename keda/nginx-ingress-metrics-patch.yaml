@@ -1,13 +1,3 @@
-# NGINX Ingress Controller Metrics Configuration
-# This patch enables Prometheus metrics on the nginx ingress controller
-#
-# If using Helm, add these values to your nginx-ingress values file
-# If using raw manifests, apply this patch to the existing controller
-#
-# Apply patch: kubectl patch deployment ingress-nginx-controller -n ingress-nginx --patch-file nginx-ingress-metrics-patch.yaml
-
----
-# Option 1: Patch for existing deployment (kubectl patch)
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -24,7 +14,6 @@ spec:
       containers:
         - name: controller
           args:
-            # Existing args are preserved, add these:
             - --enable-metrics=true
             - --metrics-per-host=false
           ports:
@@ -33,7 +22,6 @@ spec:
               protocol: TCP
 
 ---
-# Option 2: Service to expose metrics endpoint
 apiVersion: v1
 kind: Service
 metadata:
@@ -52,45 +40,3 @@ spec:
       port: 10254
       targetPort: metrics
       protocol: TCP
-
----
-# Option 3: Helm values for nginx-ingress chart
-# Save as nginx-ingress-values.yaml and use with:
-# helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
-#   -n ingress-nginx --create-namespace -f nginx-ingress-values.yaml
-
-# controller:
-#   metrics:
-#     enabled: true
-#     port: 10254
-#     portName: metrics
-#
-#     service:
-#       annotations:
-#         prometheus.io/scrape: "true"
-#         prometheus.io/port: "10254"
-#
-#     serviceMonitor:
-#       enabled: true
-#       namespace: monitoring
-#       additionalLabels:
-#         release: prometheus
-#
-#   podAnnotations:
-#     prometheus.io/scrape: "true"
-#     prometheus.io/port: "10254"
-#     prometheus.io/path: "/metrics"
-#
-#   config:
-#     enable-underscores-in-headers: "true"
-#     use-forwarded-headers: "true"
-#     compute-full-forwarded-for: "true"
-#     use-proxy-protocol: "false"
-#
-#   # For AWS NLB
-#   service:
-#     type: LoadBalancer
-#     annotations:
-#       service.beta.kubernetes.io/aws-load-balancer-type: nlb
-#       service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
-#       service.beta.kubernetes.io/aws-load-balancer-backend-protocol: tcp

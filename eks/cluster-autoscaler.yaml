@@ -1,9 +1,3 @@
-# CLUSTER AUTOSCALER: Automatically scales EC2 nodes up/down based on pod demand
-# - When pods are Pending (can't fit on existing nodes), it launches new EC2 instances
-# - When nodes are underutilized, it terminates them to save money
-# - Works with the HPA: HPA scales pods, Cluster Autoscaler scales nodes
-# - Needs IAM permissions and tags in eks-cluster.yaml to work
----
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -179,5 +173,3 @@ spec:
         - name: ssl-certs
           hostPath:
             path: /etc/ssl/certs/ca-bundle.crt
-
-

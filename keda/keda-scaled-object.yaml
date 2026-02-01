@@ -1,4 +1,3 @@
----
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
@@ -8,51 +7,45 @@ metadata:
     app: health-service
     scaler: prometheus
 spec:
-  # Target deployment to scale
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
     name: health-service
 
-  # Scaling boundaries
   minReplicaCount: 2
   maxReplicaCount: 10
+  cooldownPeriod: 30
+  pollingInterval: 15
 
-  # Cooldown periods (in seconds)
-  cooldownPeriod: 30        # Wait 30s after scale-down before next scale-down
-  pollingInterval: 15       # Check metrics every 15 seconds
-
-  # Advanced scaling behavior (similar to HPA v2)
   advanced:
     horizontalPodAutoscalerConfig:
       behavior:
         scaleUp:
-          stabilizationWindowSeconds: 0    # Immediate scale-up
+          stabilizationWindowSeconds: 0
           policies:
             - type: Percent
-              value: 100                    # Double pods
+              value: 100
               periodSeconds: 15
             - type: Pods
-              value: 4                      # Or add 4 pods
-              periodSeconds: 15
-          selectPolicy: Max                 # Use whichever scales more
-
-        scaleDown:
-          stabilizationWindowSeconds: 30   # Wait 30s before scaling down
-          policies:
-            - type: Percent
-              value: 50                    # Remove 50% of pods
+              value: 4
               periodSeconds: 15
           selectPolicy: Max
 
-  # Triggers - the metrics that drive scaling decisions
+        scaleDown:
+          stabilizationWindowSeconds: 30
+          policies:
+            - type: Percent
+              value: 50
+              periodSeconds: 15
+          selectPolicy: Max
+
   triggers:
-    # 1. HTTP Request Rate (requests per second per pod)
+    # RPS per pod
     - type: prometheus
       metadata:
         serverAddress: http://prometheus-prometheus.monitoring.svc.cluster.local:9090
         metricName: nginx_http_requests_rate
-        threshold: "100"                   # Scale when RPS > 100 per pod
+        threshold: "100"
         query: |
           sum(rate(nginx_ingress_controller_requests{
             namespace="default",
@@ -63,16 +56,13 @@ spec:
             pod=~"health-service.*",
             condition="true"
           })
-        # Authentication (if Prometheus requires it)
-        # authModes: "bearer"
-        # unsafeSsl: "false"
 
-    # 2. HTTP Request Latency (p95 response time)
+    # P95 latency (ms)
     - type: prometheus
       metadata:
         serverAddress: http://prometheus-prometheus.monitoring.svc.cluster.local:9090
         metricName: nginx_http_latency_p95
-        threshold: "500"                   # Scale when p95 latency > 500ms
+        threshold: "500"
         query: |
           histogram_quantile(0.95,
             sum(rate(nginx_ingress_controller_request_duration_seconds_bucket{
@@ -81,12 +71,12 @@ spec:
             }[5m])) by (le)
           ) * 1000
 
-    # 3. Active Connections (concurrent connections)
+    # Active connections per pod
     - type: prometheus
       metadata:
         serverAddress: http://prometheus-prometheus.monitoring.svc.cluster.local:9090
         metricName: nginx_active_connections
-        threshold: "50"                    # Scale when connections > 50 per pod
+        threshold: "50"
         query: |
           sum(nginx_ingress_controller_nginx_process_connections{
             state="active"
@@ -97,12 +87,12 @@ spec:
             condition="true"
           })
 
-    # 4. CPU Utilization (fallback metric, similar to original HPA)
+    # CPU %
     - type: prometheus
       metadata:
         serverAddress: http://prometheus-prometheus.monitoring.svc.cluster.local:9090
         metricName: health_service_cpu_utilization
-        threshold: "70"                    # Scale at 70% CPU (matches original HPA)
+        threshold: "70"
         query: |
           avg(
             rate(container_cpu_usage_seconds_total{
@@ -120,12 +110,12 @@ spec:
             }
           )
 
-    # 5. Memory Utilization
+    # Memory %
     - type: prometheus
       metadata:
         serverAddress: http://prometheus-prometheus.monitoring.svc.cluster.local:9090
         metricName: health_service_memory_utilization
-        threshold: "80"                    # Scale at 80% memory
+        threshold: "80"
         query: |
           avg(
             container_memory_working_set_bytes{
@@ -142,4 +132,3 @@ spec:
               resource="memory"
             }
           )
-

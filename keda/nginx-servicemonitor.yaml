@@ -1,9 +1,3 @@
-# ServiceMonitor for NGINX Ingress Controller
-# Enables Prometheus to scrape nginx metrics for KEDA scaling
-#
-# Apply with: kubectl apply -f nginx-servicemonitor.yaml
-
----
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -12,27 +6,23 @@ metadata:
   labels:
     app.kubernetes.io/name: nginx-ingress
     app.kubernetes.io/component: controller
-    release: prometheus  # Must match Prometheus Helm release name
+    release: prometheus
 spec:
-  # Which namespaces to look for Services
   namespaceSelector:
     matchNames:
       - ingress-nginx
 
-  # Which Services to monitor (by label)
   selector:
     matchLabels:
       app.kubernetes.io/name: ingress-nginx
       app.kubernetes.io/component: controller
 
-  # Endpoints to scrape
   endpoints:
-    - port: metrics           # Port name from nginx service
+    - port: metrics
       interval: 15s
       path: /metrics
       scheme: http
 
-      # Relabeling to add useful labels
       relabelings:
         - sourceLabels: [__meta_kubernetes_service_name]
           targetLabel: service
@@ -42,7 +32,6 @@ spec:
           targetLabel: pod
 
 ---
-# PodMonitor alternative (if service doesn't expose metrics port)
 apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor
 metadata:
@@ -67,8 +56,6 @@ spec:
       path: /metrics
 
 ---
-# ServiceMonitor for health-service application metrics
-# (if your app exposes Prometheus metrics)
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -87,7 +74,7 @@ spec:
       app: health-service
 
   endpoints:
-    - port: http           # Assuming your service exposes metrics on the http port
+    - port: http
       interval: 15s
-      path: /metrics        # Change if your app uses different path
+      path: /metrics
       scheme: http
