@@ -1,8 +1,5 @@
-# Default values for health-service
-
 replicaCount: 1
 
-# Redis configuration
 redis:
   enabled: true
   image:
@@ -18,17 +15,16 @@ redis:
       cpu: "100m"
 
 image:
-  repository: ""  # Set dynamically via --set in deploy script
+  repository: ""
   tag: latest
   pullPolicy: Always
 
 service:
-  type: ClusterIP  # Changed from LoadBalancer - use NGINX instead
+  type: ClusterIP
   httpPort: 80
   httpsPort: 443
   targetPort: 8080
 
-# Ingress configuration (routes traffic through NGINX)
 ingress:
   enabled: true
   className: nginx
@@ -52,7 +48,6 @@ resources:
     memory: "512Mi"
     cpu: "1000m"
 
-# Health check probes
 readinessProbe:
   httpGet:
     path: /health
@@ -72,14 +67,12 @@ livenessProbe:
   timeoutSeconds: 5
   failureThreshold: 5
 
-# Horizontal Pod Autoscaler
 autoscaling:
   enabled: true
   minReplicas: 1
   maxReplicas: 10
   targetCPUUtilizationPercentage: 70
 
-  # Scale up behavior
   scaleUp:
     stabilizationWindowSeconds: 0
     policies:
@@ -91,7 +84,6 @@ autoscaling:
       periodSeconds: 15
     selectPolicy: Max
 
-  # Scale down behavior
   scaleDown:
     stabilizationWindowSeconds: 30
     policies:

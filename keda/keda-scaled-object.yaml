@@ -1,8 +1,3 @@
-# KEDA ScaledObject for health-service
-# Replaces traditional HPA with event-driven autoscaling using Prometheus metrics
-#
-# Apply with: kubectl apply -f keda-scaled-object.yaml
-
 ---
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
@@ -148,18 +143,3 @@ spec:
             }
           )
 
----
-# Fallback HPA (KEDA creates this automatically, but you can customize)
-# This is optional - KEDA manages the HPA, but showing for reference
-# apiVersion: autoscaling/v2
-# kind: HorizontalPodAutoscaler
-# metadata:
-#   name: keda-hpa-health-service
-#   namespace: default
-# spec:
-#   scaleTargetRef:
-#     apiVersion: apps/v1
-#     kind: Deployment
-#     name: health-service
-#   minReplicas: 2
-#   maxReplicas: 10

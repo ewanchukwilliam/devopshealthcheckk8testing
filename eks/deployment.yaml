@@ -20,7 +20,6 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
-        # READINESS PROBE: Prevents traffic until app is ready (fixes failures during scale-up)
         readinessProbe:
           httpGet:
             path: /health
@@ -30,7 +29,6 @@ spec:
           timeoutSeconds: 5
           successThreshold: 1
           failureThreshold: 3
-        # LIVENESS PROBE: Restarts pod if app crashes (lenient to avoid killing under load)
         livenessProbe:
           httpGet:
             path: /health

@@ -83,7 +83,6 @@ fi
 if [ "$SSL_ENABLED" = true ]; then
   # Create service.yaml with SSL annotations
   kubectl apply -f "$SCRIPT_DIR/service-ssl.yaml"
-  # rm "$SCRIPT_DIR/service-ssl.yaml"
 else
   kubectl apply -f "$SCRIPT_DIR/service.yaml"
 fi

@@ -12,14 +12,6 @@ docker build -t health-service:local .
 kind load docker-image health-service:local --name devops-lab
 
 echo "=== Installing Metrics Server via Helm ==="
-# Metrics Server is required for HPA (Horizontal Pod Autoscaler) to work
-# It collects resource metrics (CPU/memory) from kubelets and exposes them via Metrics API
-# HPA uses these metrics to make scaling decisions
-#
-# Special args for kind/local clusters:
-#   --kubelet-insecure-tls: Skip TLS verification (kind uses self-signed certs)
-#   --kubelet-preferred-address-types: Use InternalIP instead of hostname
-# In production (EKS/GKE), you can omit these args for proper TLS
 helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server/
 helm repo update
 helm upgrade --install metrics-server metrics-server/metrics-server \

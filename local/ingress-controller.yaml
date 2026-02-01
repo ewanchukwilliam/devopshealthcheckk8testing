@@ -1,87 +1,22 @@
-# ============================================================================
-# NGINX INGRESS CONTROLLER
-# ============================================================================
-#
-# ⚠️  NON-STANDARD KUBERNETES RESOURCE (ADDON/INFRASTRUCTURE)
-#
-# This file is DIFFERENT from the other Kubernetes resources (deployment.yaml,
-# service.yaml, ingress.yaml, hpa.yaml) because:
-#
-# 1. ADDON vs CORE RESOURCE:
-#    - Core K8s resources (Deployment, Service, Ingress, HPA) are built into
-#      Kubernetes - you create them with kubectl apply
-#    - Ingress Controller is an ADDON - software you install separately that
-#      actually implements the Ingress routing logic
-#
-# 2. WHY IS IT NEEDED?
-#    - Kubernetes Ingress resources (like ingress.yaml) are just RULES
-#    - They describe "route traffic from / to service X on port 80"
-#    - But Ingress resources don't DO anything by themselves
-#    - You need an Ingress Controller to READ those rules and route traffic
-#
-# 3. THE RELATIONSHIP:
-#    - Ingress Controller (this file) = The traffic router software (NGINX)
-#    - ingress.yaml = Configuration file telling the controller where to route
-#
-#    Analogy:
-#    - Ingress Controller = Web server (like NGINX or Apache)
-#    - ingress.yaml = The config file (/etc/nginx/nginx.conf)
-#
-# 4. WHY MULTIPLE OPTIONS?
-#    Kubernetes doesn't mandate one ingress controller. You choose:
-#    - NGINX Ingress Controller (this file) - most popular
-#    - Traefik - feature-rich, built-in Let's Encrypt
-#    - AWS ALB Ingress Controller - integrates with AWS Application Load Balancer
-#    - HAProxy, Istio, Envoy, etc.
-#
-#    Your ingress.yaml specifies which one to use:
-#      spec:
-#        ingressClassName: nginx  # ← Uses NGINX controller
-#
-# 5. PRODUCTION DEPLOYMENT:
-#    In production, you'd typically install this via Helm:
-#      helm install nginx-ingress ingress-nginx/ingress-nginx \
-#        --set controller.service.type=LoadBalancer \
-#        --set controller.autoscaling.enabled=true
-#
-#    This file is the raw YAML equivalent for learning/local development.
-#
-# 6. WHAT THIS FILE CONTAINS:
-#    - Namespace: Isolated namespace for ingress controller
-#    - ServiceAccounts: Identity for the controller pods
-#    - Roles/ClusterRoles: Permissions to read Ingress resources
-#    - RoleBindings: Link roles to service accounts
-#    - ConfigMap: NGINX configuration (allow-snippet-annotations, etc.)
-#    - Services: Expose NGINX on ports 80/443
-#    - Deployment: The actual NGINX controller pods
-#    - Jobs: Webhook certificate generation (validates Ingress resources)
-#    - IngressClass: Defines the "nginx" class that ingress.yaml references
-#    - ValidatingWebhookConfiguration: Validates Ingress YAML before creation
-#
-# ============================================================================
-
-apiVersion: v1  # Kubernetes API version for Namespaces
-kind: Namespace  # Create isolated namespace for ingress controller
-metadata:
-  labels:
-    app.kubernetes.io/instance: ingress-nginx  # Instance identifier
-    app.kubernetes.io/name: ingress-nginx  # Application name
-  name: ingress-nginx  # Namespace name (all controller resources go here)
----
-# ============================================================================
-# SERVICE ACCOUNTS - Identity for pods to authenticate with Kubernetes API
-# ============================================================================
 apiVersion: v1
-automountServiceAccountToken: true  # Automatically mount API token in pods
-kind: ServiceAccount  # Identity used by controller pods
+kind: Namespace
 metadata:
   labels:
-    app.kubernetes.io/component: controller  # This is for the main controller
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+  name: ingress-nginx
+---
+apiVersion: v1
+automountServiceAccountToken: true
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
     app.kubernetes.io/instance: ingress-nginx
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/part-of: ingress-nginx
     app.kubernetes.io/version: 1.8.1
-  name: ingress-nginx  # ServiceAccount name (used in Deployment spec)
+  name: ingress-nginx
   namespace: ingress-nginx
 ---
 apiVersion: v1
@@ -96,22 +31,8 @@ metadata:
   name: ingress-nginx-admission
   namespace: ingress-nginx
 ---
-# ============================================================================
-# RBAC - Permissions for the ingress controller to function
-# ============================================================================
-# Role: Permissions within the ingress-nginx namespace only
-# ClusterRole: Cluster-wide permissions (read Ingress resources across all namespaces)
-# RoleBinding/ClusterRoleBinding: Link ServiceAccounts to Roles
-#
-# Why needed: Controller needs to:
-# - Read Ingress resources to know routing rules
-# - Read Services/Endpoints to know where to route traffic
-# - Read Secrets for TLS certificates
-# - Update Ingress status fields
-# - Create/update ConfigMaps for dynamic configuration
-# ============================================================================
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role  # Namespace-scoped permissions (within ingress-nginx namespace)
+kind: Role
 metadata:
   labels:
     app.kubernetes.io/component: controller
@@ -121,7 +42,7 @@ metadata:
     app.kubernetes.io/version: 1.8.1
   name: ingress-nginx
   namespace: ingress-nginx
-rules:  # List of permissions
+rules:
 - apiGroups:
   - ""
   resources:
@@ -397,20 +318,9 @@ subjects:
   name: ingress-nginx-admission
   namespace: ingress-nginx
 ---
-# ============================================================================
-# CONFIGMAP - NGINX Controller Configuration
-# ============================================================================
-# This ConfigMap contains configuration options for NGINX
-# The controller reads this and generates the actual NGINX config file
-# You can add options like:
-#   proxy-body-size: "50m"  # Max request body size
-#   proxy-connect-timeout: "10"  # Upstream connection timeout
-#   use-gzip: "true"  # Enable gzip compression
-#   ssl-protocols: "TLSv1.2 TLSv1.3"  # Allowed TLS versions
-# ============================================================================
 apiVersion: v1
 data:
-  allow-snippet-annotations: "true"  # Allow custom NGINX snippets in Ingress annotations (security risk in prod)
+  allow-snippet-annotations: "true"
 kind: ConfigMap
 metadata:
   labels:
@@ -419,17 +329,9 @@ metadata:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/part-of: ingress-nginx
     app.kubernetes.io/version: 1.8.1
-  name: ingress-nginx-controller  # Referenced by Deployment (--configmap flag)
+  name: ingress-nginx-controller
   namespace: ingress-nginx
 ---
-# ============================================================================
-# SERVICE - Expose NGINX Controller
-# ============================================================================
-# This Service exposes the NGINX controller pods on ports 80 (HTTP) and 443 (HTTPS)
-# Type: NodePort - For local/kind clusters, exposes on node ports
-#       LoadBalancer - For cloud (EKS/GKE/AKS), creates cloud load balancer
-# The kind-config.yaml maps these to localhost:80 and localhost:443
-# ============================================================================
 apiVersion: v1
 kind: Service
 metadata:
@@ -439,28 +341,28 @@ metadata:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/part-of: ingress-nginx
     app.kubernetes.io/version: 1.8.1
-  name: ingress-nginx-controller  # Service name (used by admission webhook)
+  name: ingress-nginx-controller
   namespace: ingress-nginx
 spec:
   ipFamilies:
-  - IPv4  # Use IPv4 addresses
-  ipFamilyPolicy: SingleStack  # IPv4 only (could be DualStack for IPv4+IPv6)
+  - IPv4
+  ipFamilyPolicy: SingleStack
   ports:
-  - appProtocol: http  # Application protocol (informational)
-    name: http  # Port name
-    port: 80  # External port (what clients connect to)
+  - appProtocol: http
+    name: http
+    port: 80
     protocol: TCP
-    targetPort: http  # Target port on controller pod (named port from Deployment)
+    targetPort: http
   - appProtocol: https
     name: https
-    port: 443  # HTTPS port
+    port: 443
     protocol: TCP
-    targetPort: https  # Target port on controller pod
-  selector:  # Route traffic to pods with these labels (from Deployment)
+    targetPort: https
+  selector:
     app.kubernetes.io/component: controller
     app.kubernetes.io/instance: ingress-nginx
     app.kubernetes.io/name: ingress-nginx
-  type: NodePort  # For local: NodePort, For cloud: LoadBalancer
+  type: NodePort
 ---
 apiVersion: v1
 kind: Service
@@ -485,12 +387,6 @@ spec:
     app.kubernetes.io/name: ingress-nginx
   type: ClusterIP
 ---
-# ============================================================================
-# DEPLOYMENT - The actual NGINX Ingress Controller pods
-# ============================================================================
-# This is the heart of the ingress controller - the pods that run NGINX
-# and watch for Ingress resources to configure routing
-# ============================================================================
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -500,23 +396,23 @@ metadata:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/part-of: ingress-nginx
     app.kubernetes.io/version: 1.8.1
-  name: ingress-nginx-controller  # Deployment name
+  name: ingress-nginx-controller
   namespace: ingress-nginx
 spec:
-  minReadySeconds: 0  # Pod ready immediately after health checks pass
-  revisionHistoryLimit: 10  # Keep 10 old ReplicaSets for rollback
+  minReadySeconds: 0
+  revisionHistoryLimit: 10
   selector:
-    matchLabels:  # Pods this Deployment manages
+    matchLabels:
       app.kubernetes.io/component: controller
       app.kubernetes.io/instance: ingress-nginx
       app.kubernetes.io/name: ingress-nginx
   strategy:
     rollingUpdate:
-      maxUnavailable: 1  # Max 1 pod down during updates
-    type: RollingUpdate  # Update pods gradually
+      maxUnavailable: 1
+    type: RollingUpdate
   template:
     metadata:
-      labels:  # Labels applied to pods (must match selector above)
+      labels:
         app.kubernetes.io/component: controller
         app.kubernetes.io/instance: ingress-nginx
         app.kubernetes.io/name: ingress-nginx
@@ -524,17 +420,17 @@ spec:
         app.kubernetes.io/version: 1.8.1
     spec:
       containers:
-      - args:  # Command-line arguments for the controller
-        - /nginx-ingress-controller  # Controller binary
-        - --election-id=ingress-nginx-leader  # Leader election for HA
-        - --controller-class=k8s.io/ingress-nginx  # Controller identifier
-        - --ingress-class=nginx  # Watch for ingressClassName: nginx
-        - --configmap=$(POD_NAMESPACE)/ingress-nginx-controller  # ConfigMap for NGINX config
-        - --validating-webhook=:8443  # Admission webhook port
-        - --validating-webhook-certificate=/usr/local/certificates/cert  # Webhook cert
-        - --validating-webhook-key=/usr/local/certificates/key  # Webhook key
-        - --watch-ingress-without-class=true  # Watch Ingress resources without ingressClassName
-        - --publish-status-address=localhost  # Address to publish in Ingress status
+      - args:
+        - /nginx-ingress-controller
+        - --election-id=ingress-nginx-leader
+        - --controller-class=k8s.io/ingress-nginx
+        - --ingress-class=nginx
+        - --configmap=$(POD_NAMESPACE)/ingress-nginx-controller
+        - --validating-webhook=:8443
+        - --validating-webhook-certificate=/usr/local/certificates/cert
+        - --validating-webhook-key=/usr/local/certificates/key
+        - --watch-ingress-without-class=true
+        - --publish-status-address=localhost
         env:
         - name: POD_NAME
           valueFrom:
@@ -716,23 +612,8 @@ spec:
         runAsUser: 2000
       serviceAccountName: ingress-nginx-admission
 ---
-# ============================================================================
-# INGRESSCLASS - Critical: Links ingress.yaml to this controller
-# ============================================================================
-# This is THE KEY resource that connects everything together!
-#
-# When you create ingress.yaml with:
-#   spec:
-#     ingressClassName: nginx  ← References this IngressClass by name
-#
-# The NGINX controller looks for Ingress resources that reference this class
-# and configures routing for them. Without this, your ingress.yaml won't work!
-#
-# Other ingress controllers (Traefik, ALB) would have their own IngressClass
-# with different controller identifiers.
-# ============================================================================
 apiVersion: networking.k8s.io/v1
-kind: IngressClass  # Defines an ingress controller class
+kind: IngressClass
 metadata:
   labels:
     app.kubernetes.io/component: controller
@@ -740,9 +621,9 @@ metadata:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/part-of: ingress-nginx
     app.kubernetes.io/version: 1.8.1
-  name: nginx  # ← This name is what ingress.yaml references with ingressClassName: nginx
+  name: nginx
 spec:
-  controller: k8s.io/ingress-nginx  # Controller identifier (matches --controller-class in Deployment)
+  controller: k8s.io/ingress-nginx
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
