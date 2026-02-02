@@ -98,7 +98,7 @@ async def health_check():
     key = f"health-cache:{ns}:{pod}"
     health = r.get(key)
     if health:
-        health = json.loads(r.get(key))
+        health = json.loads(health)
     else:
         health = get_process_metrics()
         r.set(key, json.dumps(health), ex=5)
