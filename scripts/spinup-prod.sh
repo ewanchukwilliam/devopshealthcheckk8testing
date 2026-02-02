@@ -84,7 +84,10 @@ helm repo update autoscaler
 helm upgrade --install cluster-autoscaler autoscaler/cluster-autoscaler \
   --namespace kube-system \
   --set autoDiscovery.clusterName="$CLUSTER_NAME" \
-  --set awsRegion="$AWS_REGION"
+  --set awsRegion="$AWS_REGION" \
+  --set extraArgs.scale-down-delay-after-add=2m \
+  --set extraArgs.scale-down-unneeded-time=2m \
+  --set extraArgs.scale-down-utilization-threshold=0.7
 
 echo "Installing NGINX Ingress Controller..."
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
