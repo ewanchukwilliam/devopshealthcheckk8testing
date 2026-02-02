@@ -12,3 +12,5 @@ container_metrics.log
 
 # contains the SSL certificate
 eks/service-ssl.yaml
+terraform/environments/prod/terraform.tfstate
+terraform/environments/prod/terraform.tfstate.backup
