@@ -107,6 +107,33 @@ resource "aws_iam_role_policy_attachment" "node_registry" {
   role       = aws_iam_role.node.name
 }
 
+# Cluster Autoscaler IAM policy
+resource "aws_iam_role_policy" "cluster_autoscaler" {
+  name = "${var.name}-cluster-autoscaler"
+  role = aws_iam_role.node.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "autoscaling:DescribeAutoScalingGroups",
+          "autoscaling:DescribeAutoScalingInstances",
+          "autoscaling:DescribeLaunchConfigurations",
+          "autoscaling:DescribeScalingActivities",
+          "autoscaling:DescribeTags",
+          "autoscaling:SetDesiredCapacity",
+          "autoscaling:TerminateInstanceInAutoScalingGroup",
+          "ec2:DescribeLaunchTemplateVersions",
+          "ec2:DescribeInstanceTypes"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
 # Security Group for Cluster
 resource "aws_security_group" "cluster" {
   name        = "${var.name}-cluster-sg"

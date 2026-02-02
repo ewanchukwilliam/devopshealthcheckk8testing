@@ -78,6 +78,14 @@ helm upgrade --install keda kedacore/keda \
   --namespace keda \
   --create-namespace
 
+echo "Installing Cluster Autoscaler..."
+helm repo add autoscaler https://kubernetes.github.io/autoscaler
+helm repo update autoscaler
+helm upgrade --install cluster-autoscaler autoscaler/cluster-autoscaler \
+  --namespace kube-system \
+  --set autoDiscovery.clusterName="$CLUSTER_NAME" \
+  --set awsRegion="$AWS_REGION"
+
 echo "Installing NGINX Ingress Controller..."
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo update ingress-nginx
@@ -101,11 +109,9 @@ helm upgrade --install redis bitnami/redis \
 # Step 4: Deploy application
 echo ""
 echo "=== Step 4: Deploying Application ==="
-# Use kustomize edit to set the image (no sed needed)
-pushd "$MANIFESTS_PROD" > /dev/null
-kustomize edit set image health-service="$ECR_REPO_URL:latest"
-popd > /dev/null
+# Apply manifests then set the image (kubectl built-in)
 kubectl apply -k "$MANIFESTS_PROD"
+kubectl set image deployment/health-service health-service="$ECR_REPO_URL:latest"
 
 # Step 5: Grafana dashboards (optional - may not schedule if resources tight)
 echo ""
