@@ -1,20 +1,23 @@
 # Prod overrides for Prometheus (EKS)
 # Note: Persistence disabled - EBS CSI driver not installed
+# Note: Low CPU requests for cost optimization
 
 prometheus:
   prometheusSpec:
     retention: 3d
     resources:
       requests:
-        cpu: 500m
-        memory: 1Gi
+        cpu: 100m
+        memory: 512Mi
     # storageSpec disabled - requires EBS CSI driver
     storageSpec: {}
 
 grafana:
   persistence:
     enabled: false
+  podAnnotations:
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
   resources:
     requests:
-      cpu: 200m
-      memory: 256Mi
+      cpu: 50m
+      memory: 128Mi
