@@ -1,0 +1,18 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: redis-scaledobject
+  namespace: default
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet
+    name: redis-master
+
+  minReplicaCount: 0
+  maxReplicaCount: 1       # Only need 1 Redis
+  cooldownPeriod: 120      # Wait longer before scaling down (data persistence)
+  pollingInterval: 15
+
+  # Triggers defined in environment overlays
+  triggers: []

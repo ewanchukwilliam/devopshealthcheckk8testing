@@ -32,11 +32,15 @@ controller:
   publishService:
     enabled: true
 
-  # Reduced resources for cost optimization
+  # Reduced resources for t3.small
   resources:
     requests:
-      cpu: 50m
-      memory: 128Mi
+      cpu: 25m
+      memory: 64Mi
     limits:
-      cpu: 500m
-      memory: 512Mi
+      cpu: 200m
+      memory: 256Mi
+
+  # Allow autoscaler to evict
+  podAnnotations:
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"

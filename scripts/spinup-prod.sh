@@ -56,12 +56,6 @@ echo "Pushed: $ECR_REPO_URL:latest"
 echo ""
 echo "=== Step 3: Installing Platform Components ==="
 
-echo "Installing Metrics Server..."
-helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server/
-helm repo update metrics-server
-helm upgrade --install metrics-server metrics-server/metrics-server \
-  --namespace kube-system
-
 echo "Installing Prometheus + Grafana..."
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update prometheus-community

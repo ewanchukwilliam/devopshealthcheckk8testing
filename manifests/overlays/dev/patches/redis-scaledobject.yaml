@@ -1,0 +1,16 @@
+# Dev: Redis scales with any traffic
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: redis-scaledobject
+spec:
+  triggers:
+    - type: prometheus
+      metricType: AverageValue
+      metadata:
+        serverAddress: http://prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090
+        metricName: http_requests_per_second
+        threshold: "1"
+        activationThreshold: "0.5"   # Must exceed 0.5 req/s to wake from zero
+        query: |
+          sum(rate(nginx_ingress_controller_nginx_process_requests_total[1m])) or vector(0)

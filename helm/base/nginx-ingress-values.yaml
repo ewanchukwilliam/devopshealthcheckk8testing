@@ -48,6 +48,9 @@ controller:
     proxy-connect-timeout: "10"
     proxy-read-timeout: "60"
     proxy-send-timeout: "60"
+    # Enable server-snippet annotations for custom error pages
+    allow-snippet-annotations: "true"
+    annotations-risk-level: "Critical"
     log-format-upstream: '$remote_addr - $request_id [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent" $request_length $request_time [$proxy_upstream_name] [$proxy_alternative_upstream_name] $upstream_addr $upstream_response_length $upstream_response_time $upstream_status $req_id'
 
   # Watch all namespaces

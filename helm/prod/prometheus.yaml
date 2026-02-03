@@ -1,23 +1,62 @@
 # Prod overrides for Prometheus (EKS)
-# Note: Persistence disabled - EBS CSI driver not installed
-# Note: Low CPU requests for cost optimization
+# Optimized for t3.small (~2GB RAM)
 
 prometheus:
   prometheusSpec:
-    retention: 3d
+    retention: 1d  # Shorter retention to save memory
     resources:
       requests:
-        cpu: 100m
-        memory: 512Mi
-    # storageSpec disabled - requires EBS CSI driver
+        cpu: 50m
+        memory: 256Mi
+      limits:
+        cpu: 200m
+        memory: 384Mi
     storageSpec: {}
+  # Allow scale-down when idle
+  podAnnotations:
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+
+alertmanager:
+  enabled: false  # Disable for minimal footprint
 
 grafana:
+  enabled: true
   persistence:
     enabled: false
   podAnnotations:
     cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
   resources:
     requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+
+# Disable unnecessary exporters for minimal footprint
+kubeStateMetrics:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
       cpu: 50m
+      memory: 64Mi
+
+nodeExporter:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 50m
+      memory: 64Mi
+
+prometheusOperator:
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      cpu: 100m
       memory: 128Mi

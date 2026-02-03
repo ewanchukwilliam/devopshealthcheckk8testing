@@ -1,18 +1,24 @@
-apiVersion: networking.k8s.io/v1  
-kind: Ingress  
-metadata:  
-  name: health-service-ingress  
-  labels:  
-    app: health-service  
-spec:  
-  ingressClassName: nginx  
-  rules:  
-  - http:  
-      paths:  
-      - path: /  
-        pathType: Prefix  
-        backend:  
-          service:  
-            name: health-service  
-            port:  
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: health-service-ingress
+  labels:
+    app: health-service
+  annotations:
+    # Retry on 502/503 during scale-from-zero
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "5"
+    nginx.ingress.kubernetes.io/proxy-next-upstream: "error timeout http_502 http_503"
+    nginx.ingress.kubernetes.io/proxy-next-upstream-tries: "3"
+    nginx.ingress.kubernetes.io/proxy-next-upstream-timeout: "30"
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: health-service
+            port:
               number: 80  

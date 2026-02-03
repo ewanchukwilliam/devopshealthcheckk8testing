@@ -6,3 +6,4 @@ resources:
   - service-clusterip.yaml
   - ingress.yaml
   - keda-scaledobject.yaml
+  - keda-redis-scaledobject.yaml

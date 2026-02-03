@@ -5,7 +5,7 @@ kind: Deployment
 metadata:
   name: health-service
 spec:
-  replicas: 3
+  replicas: 0  # KEDA manages scaling from 0
   template:
     metadata:
       annotations:
@@ -16,13 +16,16 @@ spec:
           imagePullPolicy: Always
           # Remove docker socket mount (EKS uses containerd)
           volumeMounts: []
+          env:
+            - name: WORKERS
+              value: "2"  # Match 256Mi limit (~100MB per worker)
           resources:
             requests:
               cpu: 50m
               memory: 128Mi
             limits:
-              cpu: 500m
-              memory: 512Mi
+              cpu: 200m
+              memory: 256Mi
           readinessProbe:
             httpGet:
               path: /health

@@ -90,10 +90,10 @@ module "eks" {
   subnet_ids         = module.vpc.private_subnet_ids
   kubernetes_version = "1.29"
 
-  node_instance_types = ["t3.medium"]
-  node_desired_size   = 2
+  node_instance_types = ["t3.small"]
+  node_desired_size   = 1
   node_min_size       = 1
-  node_max_size       = 5
+  node_max_size       = 3
 
   tags = local.tags
 }

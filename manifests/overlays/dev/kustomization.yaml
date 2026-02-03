@@ -8,6 +8,8 @@ resources:
 # Dev-specific patches
 patches:
   - path: patches/deployment.yaml
+  - path: patches/redis-scaledobject.yaml
+  - path: patches/ingress-error-page.yaml
 
 # Dev-specific labels (using 'labels' instead of deprecated 'commonLabels')
 labels:
